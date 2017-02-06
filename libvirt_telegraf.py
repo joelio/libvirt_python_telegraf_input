@@ -3,9 +3,7 @@
 Gathers libvirt statistics for running instances and outputs
 in a format that can be used with telegraf's exec plugin
 """
-import sys
 from xml.etree import ElementTree
-
 import libvirt
 
 LIBVIRT_CONN = 'qemu:///system'
@@ -23,27 +21,27 @@ def setup_connection():
 
 def write_telegraf_line(conn, dom, data):
     """ Takes a dict and formats and prints the output in telegraf format """
-    vm = conn.lookupByID(dom)
+    virt_machine = conn.lookupByID(dom)
     line = ''.join("{}={}i,".format(key, val) for key, val in data.items())
     line = line[:-1]
-    print 'libvirt,instance={} {}'.format(vm.name(), line)
+    print 'libvirt,instance={} {}'.format(virt_machine.name(), line)
 
 
 def get_network_stats(conn, dom):
     """ Collect network statistics """
     network_stats = {}
-    vm = conn.lookupByID(dom)
-    tree = ElementTree.fromstring(vm.XMLDesc())
+    virt_machine = conn.lookupByID(dom)
+    tree = ElementTree.fromstring(virt_machine.XMLDesc())
     iface = tree.find('devices/interface/target').get('dev')
-    tmp = vm.interfaceStats(iface)
+    tmp = virt_machine.interfaceStats(iface)
     network_stats = dict([('read_bytes', str(tmp[0])),
-                         ('read_packets', str(tmp[1])),
-                         ('read_errors', str(tmp[2])),
-                         ('read_drops', str(tmp[3])),
-                         ('write_bytes', str(tmp[4])),
-                         ('write_packets', str(tmp[5])),
-                         ('write_errors', str(tmp[6])),
-                         ('write_drops', str(tmp[7]))])
+                          ('read_packets', str(tmp[1])),
+                          ('read_errors', str(tmp[2])),
+                          ('read_drops', str(tmp[3])),
+                          ('write_bytes', str(tmp[4])),
+                          ('write_packets', str(tmp[5])),
+                          ('write_errors', str(tmp[6])),
+                          ('write_drops', str(tmp[7]))])
     return network_stats
 
 
