@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint: disable=F0401
 """
 Gathers libvirt statistics for running instances and outputs
 in a format that can be used with telegraf's exec plugin
