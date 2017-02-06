@@ -21,30 +21,22 @@ def setup_connection():
         get_stats(conn)
 
 
-def write_telegraf_line(data):
+def write_telegraf_line(conn, dom, data):
     """ Takes a dict and formats and prints the output in telegraf format """
-    line = ''.join("{}={},".format(key, val) for key, val in data.items())
-    line = 'libvirt,' + line
-    print(str(line))
+    vm = conn.lookupByID(dom)
+    line = ''.join("{}={}i,".format(key, val) for key, val in data.items())
+    line = line[:-1]
+    print 'libvirt,instance={} {}'.format(vm.name(), line)
 
 
-def get_cpu_stats(dom, conn):
-    """ Collect CPU statistics """
-
-
-def get_memory_stats(dom, conn):
-    """ Collect memory statistics """
-
-
-def get_network_stats(dom, conn):
+def get_network_stats(conn, dom):
     """ Collect network statistics """
     network_stats = {}
     vm = conn.lookupByID(dom)
     tree = ElementTree.fromstring(vm.XMLDesc())
     iface = tree.find('devices/interface/target').get('dev')
     tmp = vm.interfaceStats(iface)
-    network_stats = dict([('instance_name', str(vm.name())),
-                         ('read_bytes', str(tmp[0])),
+    network_stats = dict([('read_bytes', str(tmp[0])),
                          ('read_packets', str(tmp[1])),
                          ('read_errors', str(tmp[2])),
                          ('read_drops', str(tmp[3])),
@@ -59,7 +51,7 @@ def get_stats(conn):
     """ Grabs list of domains and iterates over each one to gather stats """
     domains = conn.listDomainsID()
     for dom in domains:
-        write_telegraf_line(get_network_stats(dom, conn))
+        write_telegraf_line(conn, dom, get_network_stats(conn, dom))
     conn.close()
     exit(0)
 
