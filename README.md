@@ -6,4 +6,11 @@ Libvirt Telegraf Input
 
 Installation
 ------------
-Installation notes go here.
+
+Requires `python-libvirt` python package
+
+== Debian/Ubuntu ==
+
+`sudo apt-get install python-libvirt`
+
+== Telegraf Configuration ==
