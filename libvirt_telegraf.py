@@ -3,7 +3,6 @@
 Gathers libvirt statistics for running instances and outputs
 in a format that can be used with telegraf's exec plugin
 """
-import json
 import sys
 from xml.etree import ElementTree
 
@@ -24,7 +23,9 @@ def setup_connection():
 
 def write_telegraf_line(data):
     """ Takes a dict and formats and prints the output in telegraf format """
-    print json.dumps(data)
+    line = ''.join("{}={},".format(key, val) for key, val in data.items())
+    line = 'libvirt,' + line
+    print(str(line))
 
 
 def get_cpu_stats(dom, conn):
@@ -42,15 +43,15 @@ def get_network_stats(dom, conn):
     tree = ElementTree.fromstring(vm.XMLDesc())
     iface = tree.find('devices/interface/target').get('dev')
     tmp = vm.interfaceStats(iface)
-    network_stats = dict([('instance name', str(vm.name())),
-                         ('read bytes', str(tmp[0])),
-                         ('read packets', str(tmp[1])),
-                         ('read errors', str(tmp[2])),
-                         ('read drops', str(tmp[3])),
-                         ('write bytes', str(tmp[4])),
-                         ('write packets', str(tmp[5])),
-                         ('write errors', str(tmp[6])),
-                         ('write drops', str(tmp[7]))])
+    network_stats = dict([('instance_name', str(vm.name())),
+                         ('read_bytes', str(tmp[0])),
+                         ('read_packets', str(tmp[1])),
+                         ('read_errors', str(tmp[2])),
+                         ('read_drops', str(tmp[3])),
+                         ('write_bytes', str(tmp[4])),
+                         ('write_packets', str(tmp[5])),
+                         ('write_errors', str(tmp[6])),
+                         ('write_drops', str(tmp[7]))])
     return network_stats
 
 
